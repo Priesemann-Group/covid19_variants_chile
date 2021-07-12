@@ -1,4 +1,5 @@
 import logging
+
 log = logging.getLogger(__name__)
 import argparse
 import datetime
@@ -9,10 +10,14 @@ import pickle
 import pandas as pd
 import numpy as np
 from multiprocessing import cpu_count
+
 sys.path.append("./covid19_inference")
 
 import covid19_inference
-covid19_inference.data_retrieval.retrieval.set_data_dir(fname="./data/data_covid19_inference")
+
+covid19_inference.data_retrieval.retrieval.set_data_dir(
+    fname="./data/data_covid19_inference"
+)
 from covid19_inference import Cov19Model
 from covid19_inference.model import (
     lambda_t_with_sigmoids,
@@ -24,12 +29,17 @@ from covid19_inference.model import (
     kernelized_spread,
     kernelized_spread_variants,
     SIR_variants,
-    uncorrelated_prior_E
+    uncorrelated_prior_E,
 )
 from utils import get_cps, day_to_week_matrix
 
 
-def create_model(likelihood="dirichlet", spreading_dynamics="kernelized_spread", variants=None, new_cases_obs=None):
+def create_model(
+    likelihood="dirichlet",
+    spreading_dynamics="kernelized_spread",
+    variants=None,
+    new_cases_obs=None,
+):
     """
     Creates the variant model with different compartments
 
@@ -103,7 +113,7 @@ def create_model(likelihood="dirichlet", spreading_dynamics="kernelized_spread",
         pr_median_lambda = 0.125
     elif spreading_dynamics == "kernelized_spread":
         pr_median_lambda = 1.0
-    
+
     with Cov19Model(**params) as this_model:
 
         # Get base reproduction number/spreading rate
@@ -154,14 +164,13 @@ def create_model(likelihood="dirichlet", spreading_dynamics="kernelized_spread",
                 mu=mu,
                 f=f,
                 num_variants=num_variants,
-                name_I_begin="I_begin_v"
+                name_I_begin="I_begin_v",
             )
         elif spreading_dynamics == "kernelized_spread":
-            
+
             # Construct SEIR like model with kernelized spread
             new_cases_unknown = kernelized_spread(
-                lambda_t_log=lambda_t_log + lambda_t_unknown,
-                name_S_t="unS_t",
+                lambda_t_log=lambda_t_log + lambda_t_unknown, name_S_t="unS_t",
             )
             new_cases_v = kernelized_spread_variants(
                 lambda_t_log=lambda_t_log, f=f, num_variants=num_variants
@@ -201,15 +210,15 @@ def create_model(likelihood="dirichlet", spreading_dynamics="kernelized_spread",
             this_model.sim_begin, this_model.sim_end, variants.index
         )
         tau_w = tau.T.dot(mapping).T / 7  # mean tau value
-        tau_w = tt.clip(
-            tau_w, 1e-6, 0.9999
-        )  # bad starting energy fix range: (0,1)
+        tau_w = tt.clip(tau_w, 1e-3, 0.9999)  # bad starting energy fix range: (0,1)
+        tau_w /= tau_w.sum(axis=1, keepdims=True)
+
         pm.Deterministic("tau_w", tau_w)
 
         # Variants data
         y = pm.Data("y_obs", dat_variants)
         n = pm.Data("n_obs", dat_total)
-        
+
         # Likelihood for variants
         if likelihood == "beta":
             logp = pm.Beta.dist(alpha=y + 1, beta=n - y + 1).logp(tau_w)
@@ -223,8 +232,10 @@ def create_model(likelihood="dirichlet", spreading_dynamics="kernelized_spread",
                 shape=(len(variants), len(variant_names)),
             )
         elif likelihood == "dirichlet":
-            factor = pm.Gamma("factor_likelihood", alpha=5, beta=5)
-            logp = pm.Dirichlet.dist(a=y * factor + 1).logp(tau_w/tau_w.sum(axis=1,keepdims=True))
+            factor = pm.Gamma(
+                "factor_likelihood", alpha=5, beta=5, transform=pm.transforms.log_exp_m1
+            )
+            logp = pm.Dirichlet.dist(a=y * factor + 1).logp(tau_w)
             error = pm.Potential("error_tau", logp)
 
         return this_model
@@ -267,20 +278,22 @@ if __name__ == "__main__":
 
     # Write all logs to file
     fh = logging.FileHandler(args.log + "/" + f_str + ".log")
-    fh.setFormatter(logging.Formatter('%(asctime)s::%(levelname)-4s [%(name)s] %(message)s'))
+    fh.setFormatter(
+        logging.Formatter("%(asctime)s::%(levelname)-4s [%(name)s] %(message)s")
+    )
     fh.setLevel(logging.DEBUG)
     log.addHandler(fh)
     covid19_inference.log.addHandler(fh)
     log.info(f"Script started: {datetime.datetime.now()}")
     log.info(f"Args: {args.__dict__}")
-    
+
     # Redirect all errors to file
-    sys.stderr = open(args.log + "/" + f_str + ".stderr", 'w')
-    sys.stdout = open(args.log + "/" + f_str + ".stdout", 'w')
-    
+    sys.stderr = open(args.log + "/" + f_str + ".stderr", "w")
+    sys.stdout = open(args.log + "/" + f_str + ".stdout", "w")
+
     # Create model
     model = create_model(args.likelihood, args.spread_method)
-    
+
     # Sample
     trace = pm.sample(
         model=model,
