@@ -166,21 +166,29 @@ def create_model(
                 num_variants=num_variants,
                 name_I_begin="I_begin_v",
             )
+            # Put the new cases together unknown and known into one tensor (shape: t,v)
+
+            new_cases_v = pm.Deterministic(
+                "new_cases_v",
+                tt.concatenate([new_cases_v, new_cases_unknown[:, None],], axis=1,),
+            )
         elif spreading_dynamics == "kernelized_spread":
 
-            # Construct SEIR like model with kernelized spread
-            new_cases_unknown = kernelized_spread(
-                lambda_t_log=lambda_t_log + lambda_t_unknown, name_S_t="unS_t",
-            )
-            new_cases_v = kernelized_spread_variants(
-                lambda_t_log=lambda_t_log, f=f, num_variants=num_variants
-            )
+            # Put the lambdas together unknown and known into one tensor (shape: t,v)
 
-        # Put the new cases together unknown and known into one tensor (shape: t,v)
-        new_cases_v = pm.Deterministic(
-            "new_cases_v",
-            tt.concatenate([new_cases_v, new_cases_unknown[:, None]], axis=1),
-        )
+            new_cases_v = kernelized_spread_variants(
+                lambda_t_log=tt.concatenate(
+                    [
+                        lambda_t_log[:, None] * np.ones(num_variants),
+                        lambda_t_log[:, None] + lambda_t_unknown[:, None],
+                    ],
+                    axis=1,
+                ),
+                f=tt.concatenate([f, tt.as_tensor_variable([1])]),
+                num_variants=num_variants + 1,
+                # pr_mean_median_incubation=mean_median_incubation,
+                # pr_sigma_median_incubation=None,
+            )
 
         # Delay the cases by a lognormal reporting delay and add them as a trace variable
         new_cases_v = delay_cases(
