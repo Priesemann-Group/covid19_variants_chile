@@ -1,0 +1,210 @@
+Traceback (most recent call last):
+  File "scan_perform.pyx", line 399, in theano.scan.scan_perform.perform
+ValueError: expected an ndarray
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/pymc3/sampling.py", line 496, in sample
+    start_, step = init_nuts(
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/pymc3/sampling.py", line 2187, in init_nuts
+    step = pm.NUTS(potential=potential, model=model, **kwargs)
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/pymc3/step_methods/hmc/nuts.py", line 168, in __init__
+    super().__init__(vars, **kwargs)
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/pymc3/step_methods/hmc/base_hmc.py", line 88, in __init__
+    super().__init__(vars, blocked=blocked, model=model, dtype=dtype, **theano_kwargs)
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/pymc3/step_methods/arraystep.py", line 254, in __init__
+    func = model.logp_dlogp_function(vars, dtype=dtype, **theano_kwargs)
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/pymc3/model.py", line 1004, in logp_dlogp_function
+    return ValueGradFunction(costs, grad_vars, extra_vars, **kwargs)
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/pymc3/model.py", line 691, in __init__
+    grad = tt.grad(self._cost_joined, self._vars_joined)
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 639, in grad
+    rval = _populate_grad_dict(var_to_app_to_idx, grad_dict, wrt, cost_name)
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1440, in _populate_grad_dict
+    rval = [access_grad_cache(elem) for elem in wrt]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1440, in <listcomp>
+    rval = [access_grad_cache(elem) for elem in wrt]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1393, in access_grad_cache
+    term = access_term_cache(node)[idx]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in access_term_cache
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in <listcomp>
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1393, in access_grad_cache
+    term = access_term_cache(node)[idx]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in access_term_cache
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in <listcomp>
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1393, in access_grad_cache
+    term = access_term_cache(node)[idx]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in access_term_cache
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in <listcomp>
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1393, in access_grad_cache
+    term = access_term_cache(node)[idx]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in access_term_cache
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in <listcomp>
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1393, in access_grad_cache
+    term = access_term_cache(node)[idx]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in access_term_cache
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in <listcomp>
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1393, in access_grad_cache
+    term = access_term_cache(node)[idx]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in access_term_cache
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in <listcomp>
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1393, in access_grad_cache
+    term = access_term_cache(node)[idx]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in access_term_cache
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in <listcomp>
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1393, in access_grad_cache
+    term = access_term_cache(node)[idx]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in access_term_cache
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in <listcomp>
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1393, in access_grad_cache
+    term = access_term_cache(node)[idx]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in access_term_cache
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in <listcomp>
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1393, in access_grad_cache
+    term = access_term_cache(node)[idx]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in access_term_cache
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in <listcomp>
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1393, in access_grad_cache
+    term = access_term_cache(node)[idx]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in access_term_cache
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in <listcomp>
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1393, in access_grad_cache
+    term = access_term_cache(node)[idx]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in access_term_cache
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in <listcomp>
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1393, in access_grad_cache
+    term = access_term_cache(node)[idx]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in access_term_cache
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in <listcomp>
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1393, in access_grad_cache
+    term = access_term_cache(node)[idx]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in access_term_cache
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in <listcomp>
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1393, in access_grad_cache
+    term = access_term_cache(node)[idx]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in access_term_cache
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in <listcomp>
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1393, in access_grad_cache
+    term = access_term_cache(node)[idx]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in access_term_cache
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in <listcomp>
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1393, in access_grad_cache
+    term = access_term_cache(node)[idx]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in access_term_cache
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in <listcomp>
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1393, in access_grad_cache
+    term = access_term_cache(node)[idx]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in access_term_cache
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in <listcomp>
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1393, in access_grad_cache
+    term = access_term_cache(node)[idx]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in access_term_cache
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in <listcomp>
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1393, in access_grad_cache
+    term = access_term_cache(node)[idx]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in access_term_cache
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in <listcomp>
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1393, in access_grad_cache
+    term = access_term_cache(node)[idx]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in access_term_cache
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in <listcomp>
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1393, in access_grad_cache
+    term = access_term_cache(node)[idx]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in access_term_cache
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in <listcomp>
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1393, in access_grad_cache
+    term = access_term_cache(node)[idx]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in access_term_cache
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in <listcomp>
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1393, in access_grad_cache
+    term = access_term_cache(node)[idx]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in access_term_cache
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in <listcomp>
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1393, in access_grad_cache
+    term = access_term_cache(node)[idx]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in access_term_cache
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1061, in <listcomp>
+    output_grads = [access_grad_cache(var) for var in node.outputs]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1393, in access_grad_cache
+    term = access_term_cache(node)[idx]
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/gradient.py", line 1220, in access_term_cache
+    input_grads = node.op.L_op(inputs, node.outputs, new_output_grads)
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/scan/op.py", line 2732, in L_op
+    outputs = local_op(*outer_inputs)
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/graph/op.py", line 253, in __call__
+    compute_test_value(node)
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/graph/op.py", line 130, in compute_test_value
+    required = thunk()
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/scan/op.py", line 1086, in rval
+    r = p(n, [x[0] for x in i], o)
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/theano/scan/op.py", line 1045, in p
+    return scan_perform_ext.perform(
+  File "scan_perform.pyx", line 407, in theano.scan.scan_perform.perform
+AttributeError: 'CVM' object has no attribute 'maker'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/smohr/Repositories/covid19_variants_chile/run_model.py", line 279, in <module>
+    trace = pm.sample(
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/pymc3/sampling.py", line 513, in sample
+    step = assign_step_methods(model, step, step_kwargs=kwargs)
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/pymc3/sampling.py", line 217, in assign_step_methods
+    return instantiate_steppers(model, steps, selected_steps, step_kwargs)
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/pymc3/sampling.py", line 138, in instantiate_steppers
+    step = step_class(vars=vars, **args)
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/pymc3/step_methods/arraystep.py", line 60, in __new__
+    model = modelcontext(kwargs.get("model"))
+  File "/home/smohr/anaconda3/envs/soccer/lib/python3.9/site-packages/pymc3/model.py", line 402, in modelcontext
+    raise TypeError("No model on context stack.")
+TypeError: No model on context stack.
