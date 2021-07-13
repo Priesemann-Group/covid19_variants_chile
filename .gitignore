@@ -89,5 +89,7 @@ target/
 .floo
 .flooignore
 
-.pickle
-.pickled
+*.pickle
+*.pickled
+
+data/data_covid19_inference

@@ -107,6 +107,16 @@ def create_model(
         [np.array(variants["N_Total"])] * (len(variant_names) + 1), axis=1
     )
 
+    # Calculate the scaling of the influx, we use the cases of the neighbour countries
+    # this function is called in the model because we need it in the range sim begin and sim end
+    def get_neighbour(be, en):
+        jhu = covid19_inference.data_retrieval.JHU()
+        jhu.download_all_available_data(force_local=True)
+        cases = jhu.get_new(country="Argentina",data_begin=be, data_end=en)
+        cases += jhu.get_new(country="Brasil",data_begin=be, data_end=en)
+        cases += jhu.get_new(country="Peru",data_begin=be, data_end=en)
+        return np.array(cases)
+    
     pr_delay = 10
 
     if spreading_dynamics == "SIR":
@@ -165,6 +175,7 @@ def create_model(
                 f=f,
                 num_variants=num_variants,
                 name_I_begin="I_begin_v",
+                PhiScale=get_neighbour(this_model.sim_begin,this_model.sim_end)
             )
             # Put the new cases together unknown and known into one tensor (shape: t,v)
 
@@ -188,6 +199,7 @@ def create_model(
                 num_variants=num_variants + 1,
                 # pr_mean_median_incubation=mean_median_incubation,
                 # pr_sigma_median_incubation=None,
+                PhiScale=get_neighbour(this_model.sim_begin,this_model.sim_end)
             )
 
         # Delay the cases by a lognormal reporting delay and add them as a trace variable
