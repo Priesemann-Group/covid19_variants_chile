@@ -113,7 +113,7 @@ def create_model(
         jhu = covid19_inference.data_retrieval.JHU()
         jhu.download_all_available_data(force_local=True)
         cases = jhu.get_new(country="Argentina",data_begin=be, data_end=en)
-        cases += jhu.get_new(country="Brasil",data_begin=be, data_end=en)
+        cases += jhu.get_new(country="Brazil",data_begin=be, data_end=en)
         cases += jhu.get_new(country="Peru",data_begin=be, data_end=en)
         return np.array(cases)
     
@@ -311,6 +311,10 @@ if __name__ == "__main__":
     sys.stderr = open(args.log + "/" + f_str + ".stderr", "w")
     sys.stdout = open(args.log + "/" + f_str + ".stdout", "w")
 
+    # Redirect pymc3 output
+    logPymc3 = logging.getLogger("pymc3")
+    logPymc3.addHandler(fh)
+    
     # Create model
     model = create_model(args.likelihood, args.spread_method)
 
@@ -322,7 +326,7 @@ if __name__ == "__main__":
         chains=4,
         draws=2000,
         tune=4000,
-        init="advi+adapt_diag",
+        #init="advi+adapt_diag",
     )
 
     # Save trace/model so we dont have to rerun sampling every time we change some plotting routines
