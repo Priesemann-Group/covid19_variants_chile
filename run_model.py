@@ -329,16 +329,10 @@ if __name__ == "__main__":
         return_inferencedata=True,
         cores=cpu_count(),
         chains=4,
-<<<<<<< HEAD
         draws=4000,
         tune=8000,
         #init="advi+adapt_diag",
         target_accept=0.97,
-=======
-        draws=2000,
-        tune=4000,
-        # init="advi+adapt_diag",
->>>>>>> f326556e2151d946501295ccfe50153305e0bb82
     )
 
     # Save trace/model so we dont have to rerun sampling every time we change some plotting routines
