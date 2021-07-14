@@ -112,10 +112,10 @@ def create_model(
     def get_neighbour(be, en):
         jhu = covid19_inference.data_retrieval.JHU()
         jhu.download_all_available_data(force_local=True)
-        cases = jhu.get_new(country="Argentina",data_begin=be, data_end=en)
-        cases += jhu.get_new(country="Brazil",data_begin=be, data_end=en)
-        cases += jhu.get_new(country="Peru",data_begin=be, data_end=en)
-        return np.array(cases)
+        cases = jhu.get_new(country="Argentina",data_begin=be-datetime.timedelta(days=7), data_end=en)
+        cases += jhu.get_new(country="Brazil",data_begin=be-datetime.timedelta(days=7), data_end=en)
+        cases += jhu.get_new(country="Peru",data_begin=be-datetime.timedelta(days=7), data_end=en)
+        return np.array(cases.rolling(7).mean()[be:en])
     
     pr_delay = 10
 
@@ -324,9 +324,10 @@ if __name__ == "__main__":
         return_inferencedata=True,
         cores=cpu_count(),
         chains=4,
-        draws=2000,
-        tune=4000,
+        draws=4000,
+        tune=8000,
         #init="advi+adapt_diag",
+        target_accept=0.97,
     )
 
     # Save trace/model so we dont have to rerun sampling every time we change some plotting routines
