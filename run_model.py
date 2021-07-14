@@ -112,9 +112,9 @@ def create_model(
     def get_neighbour(be, en):
         jhu = covid19_inference.data_retrieval.JHU()
         jhu.download_all_available_data(force_local=True)
-        cases = jhu.get_new(country="Argentina",data_begin=be-datetime.timedelta(days=7), data_end=en)
-        cases += jhu.get_new(country="Brazil",data_begin=be-datetime.timedelta(days=7), data_end=en)
-        cases += jhu.get_new(country="Peru",data_begin=be-datetime.timedelta(days=7), data_end=en)
+        cases = jhu.get_new(country="Argentina", data_begin=be-datetime.timedelta(days=7), data_end=en)
+        cases += jhu.get_new(country="Brazil", data_begin=be-datetime.timedelta(days=7), data_end=en)
+        cases += jhu.get_new(country="Peru", data_begin=be-datetime.timedelta(days=7), data_end=en)
         return np.array(cases.rolling(7).mean()[be:en])
     
     pr_delay = 10
@@ -175,7 +175,7 @@ def create_model(
                 f=f,
                 num_variants=num_variants,
                 name_I_begin="I_begin_v",
-                PhiScale=get_neighbour(this_model.sim_begin,this_model.sim_end)
+                PhiScale=get_neighbour(this_model.sim_begin, this_model.sim_end),
             )
             # Put the new cases together unknown and known into one tensor (shape: t,v)
 
@@ -199,7 +199,7 @@ def create_model(
                 num_variants=num_variants + 1,
                 # pr_mean_median_incubation=mean_median_incubation,
                 # pr_sigma_median_incubation=None,
-                PhiScale=get_neighbour(this_model.sim_begin,this_model.sim_end)
+                PhiScale=get_neighbour(this_model.sim_begin, this_model.sim_end),
             )
 
         # Delay the cases by a lognormal reporting delay and add them as a trace variable
@@ -258,6 +258,11 @@ def create_model(
             logp = pm.Dirichlet.dist(a=y * factor + 1).logp(tau_w)
             error = pm.Potential("error_tau", logp)
 
+        elif likelihood == "multinomial":
+            pm.Multinomial(
+                "tau_w_obs", p=tau_w, observed=y, n=n,
+            )
+
         return this_model
 
 
@@ -314,7 +319,7 @@ if __name__ == "__main__":
     # Redirect pymc3 output
     logPymc3 = logging.getLogger("pymc3")
     logPymc3.addHandler(fh)
-    
+
     # Create model
     model = create_model(args.likelihood, args.spread_method)
 
@@ -324,10 +329,16 @@ if __name__ == "__main__":
         return_inferencedata=True,
         cores=cpu_count(),
         chains=4,
+<<<<<<< HEAD
         draws=4000,
         tune=8000,
         #init="advi+adapt_diag",
         target_accept=0.97,
+=======
+        draws=2000,
+        tune=4000,
+        # init="advi+adapt_diag",
+>>>>>>> f326556e2151d946501295ccfe50153305e0bb82
     )
 
     # Save trace/model so we dont have to rerun sampling every time we change some plotting routines
