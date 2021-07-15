@@ -46,7 +46,7 @@ def create_model(
     Parameters
     ----------
     likelihood : str
-        Likelihood function for the variant data, possible : ["beta","binom","dirichlet"]
+        Likelihood function for the variant data, possible : ["beta","binom","dirichlet","multinomial"]
 
     spreading_dynamics : str
         Type of spreading dynamics to use possible : ["SIR","kernelized_spread"]
@@ -144,11 +144,25 @@ def create_model(
             name_lambda_t="unknown_lambda_t",
             prefix_lambdas="un_",
         )
-
+        
+        # Factor for each linage
         f = pm.Lognormal(name="f_v", mu=0, sigma=1, shape=(len(variant_names)))
-        f = f * np.array([1, 1, 1, 1, 0]) + np.array([0, 0, 0, 0, 1])
+        f = f * np.array([1, 1, 0, 1, 1]) + np.array([0, 0, 1, 0, 0])
 
+        #Influx
+        mapping = day_to_week_matrix(
+            this_model.sim_begin, this_model.sim_end, variants.index
+        )
+
+        
         if spreading_dynamics == "SIR":
+            #Influx
+            Phi_w = pm.HalfNormal("Phi_w", 0.01, shape=(num_variants,len(variants.index)))
+            Phi = Phi_w.dot(mapping.T)*get_neighbour(this_model.sim_begin, this_model.sim_end)
+            Phi = pm.Deterministic("Phi",Phi.T)
+        
+            
+            
             # Adds the recovery rate mu to the model as a random variable
             mu = pm.Lognormal(name="mu", mu=np.log(1 / 8), sigma=0.2)
 
@@ -175,7 +189,7 @@ def create_model(
                 f=f,
                 num_variants=num_variants,
                 name_I_begin="I_begin_v",
-                PhiScale=get_neighbour(this_model.sim_begin, this_model.sim_end),
+                Phi=Phi,
             )
             # Put the new cases together unknown and known into one tensor (shape: t,v)
 
@@ -184,9 +198,12 @@ def create_model(
                 tt.concatenate([new_cases_v, new_cases_unknown[:, None],], axis=1,),
             )
         elif spreading_dynamics == "kernelized_spread":
-
+            #Influx
+            Phi_w = pm.HalfNormal("Phi_w", 0.01, shape=(num_variants+1,len(variants.index)))
+            Phi = Phi_w.dot(mapping.T)*get_neighbour(this_model.sim_begin, this_model.sim_end)
+            Phi = pm.Deterministic("Phi",Phi.T)
+            
             # Put the lambdas together unknown and known into one tensor (shape: t,v)
-
             new_cases_v = kernelized_spread_variants(
                 lambda_t_log=tt.concatenate(
                     [
@@ -199,7 +216,7 @@ def create_model(
                 num_variants=num_variants + 1,
                 # pr_mean_median_incubation=mean_median_incubation,
                 # pr_sigma_median_incubation=None,
-                PhiScale=get_neighbour(this_model.sim_begin, this_model.sim_end),
+                Phi=Phi,
             )
 
         # Delay the cases by a lognormal reporting delay and add them as a trace variable
@@ -226,9 +243,6 @@ def create_model(
         pm.Deterministic("tau", tau)
 
         # Map daily tau to match weekly data
-        mapping = day_to_week_matrix(
-            this_model.sim_begin, this_model.sim_end, variants.index
-        )
         tau_w = tau.T.dot(mapping).T / 7  # mean tau value
         tau_w = tt.clip(tau_w, 1e-3, 0.9999)  # bad starting energy fix range: (0,1)
         tau_w /= tau_w.sum(axis=1, keepdims=True)
@@ -273,7 +287,7 @@ if __name__ == "__main__":
         "-l",
         "--likelihood",
         type=str,
-        help='Possible: ["beta","binom","dirichlet"]',
+        help='Possible: ["beta","binom","dirichlet","multinomial"]',
         default="dirichlet",
     )
 

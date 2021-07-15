@@ -30,7 +30,7 @@ log.info(f"ID: {args.id}")
 mapping = []
 
 
-possible_params_0 = ["beta","binom","dirichlet"]
+possible_params_0 = ["beta","binom","dirichlet","multinomial"]
 possible_params_1 = ["SIR","kernelized_spread"]
 
 for i in possible_params_0:
