@@ -65,7 +65,7 @@ def create_model(
     if variants is None:
         # Load data variants
         variants = pd.read_excel(
-            "./data/Chile_Variants_Updated_070721.xlsx", sheet_name="Variants_Count"
+            "./data/Chile_Variants_Updated_with_airports.xlsx", sheet_name="Variants_Count"
         )
         variants = variants.set_index("Lineage").T
         variants.index.name = "Week"
@@ -423,9 +423,9 @@ if __name__ == "__main__":
         return_inferencedata=True,
         cores=cpu_count(),
         chains=4,
-        draws=4000,
-        tune=8000,
-        # init="advi+adapt_diag",
+        draws=2000,
+        tune=2000,
+        init="advi+adapt_diag",
         target_accept=0.97,
     )
 
