@@ -29,9 +29,14 @@ def distribution(model, trace, key, nSamples_prior=1000, title="", dist_math="x"
     data = trace.posterior[key]
 
     # This function all may change in a future pymc3 version
-    prior = pm.sample_prior_predictive(
-        samples=nSamples_prior, model=model, var_names=[key]
-    )[key]
+
+    try:
+        prior = pm.sample_prior_predictive(
+            samples=nSamples_prior, model=model, var_names=[key]
+        )[key]
+    except:
+        log.warning(f"Could not calculate prior of {key}")
+        prior = None
 
     if indices is None:
         indices = [i for i in range(data.shape[-1])]
@@ -45,7 +50,7 @@ def distribution(model, trace, key, nSamples_prior=1000, title="", dist_math="x"
         for j, i in enumerate(indices):
             _distribution(
                 array_posterior=data[:, i],
-                array_prior=prior[:, i],
+                array_prior=prior[:, i] if prior is not None else None,
                 dist_name=title,
                 dist_math=dist_math,
                 suffix=f"{i}",

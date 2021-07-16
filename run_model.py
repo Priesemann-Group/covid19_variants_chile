@@ -37,6 +37,7 @@ from utils import get_cps, day_to_week_matrix
 def create_model(
     likelihood="dirichlet",
     spreading_dynamics="kernelized_spread",
+    factor_influx=1.0,
     variants=None,
     new_cases_obs=None,
 ):
@@ -65,7 +66,8 @@ def create_model(
     if variants is None:
         # Load data variants
         variants = pd.read_excel(
-            "./data/Chile_Variants_Updated_with_airports.xlsx", sheet_name="Variants_Count"
+            "./data/Chile_Variants_Updated_with_airports.xlsx",
+            sheet_name="Variants_Count",
         )
         variants = variants.set_index("Lineage").T
         variants.index.name = "Week"
@@ -171,7 +173,10 @@ def create_model(
         if spreading_dynamics == "SIR":
             # Influx
             Phi_w = pm.HalfStudentT(
-                "Phi_w", sigma=0.0005, nu=4, shape=(num_variants, len(variants.index))
+                "Phi_w",
+                sigma=0.0005 * factor_influx,
+                nu=4,
+                shape=(num_variants, len(variants.index)),
             )
             Phi = Phi_w.dot(mapping.T) * get_neighbour(
                 this_model.sim_begin, this_model.sim_end
@@ -216,7 +221,7 @@ def create_model(
             # Influx
             Phi_w = pm.HalfStudentT(
                 "Phi_w",
-                sigma=0.0005,
+                sigma=0.0005 * factor_influx,
                 nu=4,
                 shape=(num_variants + 1, len(variants.index)),
             )
@@ -271,7 +276,7 @@ def create_model(
             f = np.exp(slow_change_factors) * f
             Phi_w = pm.HalfStudentT(
                 "Phi_w",
-                sigma=0.0005,
+                sigma=0.0005 * factor_influx,
                 nu=4,
                 shape=(num_variants + 1, len(variants.index)),
             )
