@@ -30,12 +30,12 @@ log.info(f"ID: {args.id}")
 mapping = []
 
 
-possible_params_0 = ["beta","binom","dirichlet","multinomial"]
-possible_params_1 = ["SIR","kernelized_spread"]
+possible_params_0 = ["beta", "binom", "dirichlet", "multinomial"]
+possible_params_1 = ["SIR", "kernelized_spread"]
 
 for i in possible_params_0:
     for j in possible_params_1:
-        mapping.append([i,j])
+        mapping.append([i, j])
 
 
 def exec(likelihood, spread_method):
@@ -43,9 +43,7 @@ def exec(likelihood, spread_method):
     Executes python script
     """
     os.chdir("../")
-    os.system(
-        f"python run_model.py -l {likelihood} -s {spread_method}"
-    )
+    os.system(f"python run_model.py -l {likelihood} -s {spread_method}")
 
 
 exec(*mapping[args.id])

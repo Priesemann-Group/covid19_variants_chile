@@ -112,16 +112,22 @@ def create_model(
     def get_neighbour(be, en):
         jhu = covid19_inference.data_retrieval.JHU()
         jhu.download_all_available_data(force_local=True)
-        cases = jhu.get_new(country="Argentina", data_begin=be-datetime.timedelta(days=7), data_end=en)
-        cases += jhu.get_new(country="Brazil", data_begin=be-datetime.timedelta(days=7), data_end=en)
-        cases += jhu.get_new(country="Peru", data_begin=be-datetime.timedelta(days=7), data_end=en)
+        cases = jhu.get_new(
+            country="Argentina", data_begin=be - datetime.timedelta(days=7), data_end=en
+        )
+        cases += jhu.get_new(
+            country="Brazil", data_begin=be - datetime.timedelta(days=7), data_end=en
+        )
+        cases += jhu.get_new(
+            country="Peru", data_begin=be - datetime.timedelta(days=7), data_end=en
+        )
         return np.array(cases.rolling(7).mean()[be:en])
-    
+
     pr_delay = 10
 
     if spreading_dynamics == "SIR":
         pr_median_lambda = 0.125
-    elif spreading_dynamics == "kernelized_spread":
+    elif "kernelized_spread" in spreading_dynamics:
         pr_median_lambda = 1.0
 
     with Cov19Model(**params) as this_model:
@@ -129,40 +135,49 @@ def create_model(
         # Get base reproduction number/spreading rate
         lambda_t_log = lambda_t_with_sigmoids(
             change_points_list=get_cps(
-                this_model.data_begin, this_model.data_end, interval=10
+                this_model.data_begin,
+                this_model.data_end,
+                interval=14,
+                pr_median_transient_len=6,
+                pr_sigma_transient_len=2,
             ),
             pr_median_lambda_0=pr_median_lambda,
             name_lambda_t="base_lambda_t",
         )
-
         lambda_t_unknown = lambda_t_with_sigmoids(
             change_points_list=get_cps(
-                this_model.data_begin, this_model.data_end, interval=20
+                this_model.data_begin,
+                this_model.data_end,
+                interval=35,
+                pr_median_transient_len=20,
+                pr_sigma_transient_len=6,
+                pr_sigma_date_transient=5,
             ),
             pr_median_lambda_0=1,
             pr_sigma_lambda_0=0.2,
             name_lambda_t="unknown_lambda_t",
             prefix_lambdas="un_",
         )
-        
+
         # Factor for each linage
         f = pm.Lognormal(name="f_v", mu=0, sigma=1, shape=(len(variant_names)))
         f = f * np.array([1, 1, 0, 1, 1]) + np.array([0, 0, 1, 0, 0])
 
-        #Influx
+        # Influx
         mapping = day_to_week_matrix(
             this_model.sim_begin, this_model.sim_end, variants.index
         )
 
-        
         if spreading_dynamics == "SIR":
-            #Influx
-            Phi_w = pm.HalfNormal("Phi_w", 0.01, shape=(num_variants,len(variants.index)))
-            Phi = Phi_w.dot(mapping.T)*get_neighbour(this_model.sim_begin, this_model.sim_end)
-            Phi = pm.Deterministic("Phi",Phi.T)
-        
-            
-            
+            # Influx
+            Phi_w = pm.HalfStudentT(
+                "Phi_w", sigma=0.0005, nu=4, shape=(num_variants, len(variants.index))
+            )
+            Phi = Phi_w.dot(mapping.T) * get_neighbour(
+                this_model.sim_begin, this_model.sim_end
+            )
+            Phi = pm.Deterministic("Phi", Phi.T)
+
             # Adds the recovery rate mu to the model as a random variable
             mu = pm.Lognormal(name="mu", mu=np.log(1 / 8), sigma=0.2)
 
@@ -198,14 +213,21 @@ def create_model(
                 tt.concatenate([new_cases_v, new_cases_unknown[:, None],], axis=1,),
             )
         elif spreading_dynamics == "kernelized_spread":
-            #Influx
-            Phi_w = pm.HalfNormal("Phi_w", 0.01, shape=(num_variants+1,len(variants.index)))
-            Phi = Phi_w.dot(mapping.T)*get_neighbour(this_model.sim_begin, this_model.sim_end)
-            Phi = pm.Deterministic("Phi",Phi.T)
-            
+            # Influx
+            Phi_w = pm.HalfStudentT(
+                "Phi_w",
+                sigma=0.0005,
+                nu=4,
+                shape=(num_variants + 1, len(variants.index)),
+            )
+            Phi = Phi_w.dot(mapping.T) * get_neighbour(
+                this_model.sim_begin, this_model.sim_end
+            )
+            Phi = pm.Deterministic("Phi", Phi.T)
+
             # Put the lambdas together unknown and known into one tensor (shape: t,v)
             new_cases_v = kernelized_spread_variants(
-                lambda_t_log=tt.concatenate(
+                R_t_log=tt.concatenate(
                     [
                         lambda_t_log[:, None] * np.ones(num_variants),
                         lambda_t_log[:, None] + lambda_t_unknown[:, None],
@@ -217,6 +239,61 @@ def create_model(
                 # pr_mean_median_incubation=mean_median_incubation,
                 # pr_sigma_median_incubation=None,
                 Phi=Phi,
+                pr_new_E_begin=250,
+            )
+
+        elif spreading_dynamics == "kernelized_spread_and_changing_factors":
+            sigma_change_factors = (
+                pm.HalfNormal(
+                    name="sigma_change_factors",
+                    sigma=1,
+                    transform=pm.transforms.log_exp_m1,
+                )
+            ) * 0.05
+
+            slow_change_factors = lambda_t_with_sigmoids(
+                change_points_list=get_cps(
+                    this_model.data_begin,
+                    this_model.data_end,
+                    interval=50,
+                    pr_median_transient_len=30,
+                    pr_sigma_transient_len=8,
+                    pr_sigma_date_transient=8,
+                ),
+                pr_median_lambda_0=1,
+                pr_sigma_lambda_0=0.001,
+                name_lambda_t="change_of_factors",
+                prefix_lambdas="f_",
+                hierarchical=False,
+                sigma_lambda_cp=sigma_change_factors,
+                shape=num_variants,
+            )
+            f = np.exp(slow_change_factors) * f
+            Phi_w = pm.HalfStudentT(
+                "Phi_w",
+                sigma=0.0005,
+                nu=4,
+                shape=(num_variants + 1, len(variants.index)),
+            )
+            Phi = Phi_w.dot(mapping.T) * get_neighbour(
+                this_model.sim_begin, this_model.sim_end
+            )
+            Phi = pm.Deterministic("Phi", Phi.T)
+
+            # Put the lambdas together unknown and known into one tensor (shape: t,v)
+            new_cases_v = kernelized_spread_variants(
+                R_t_log=tt.concatenate(
+                    [
+                        lambda_t_log[:, None] * np.ones(num_variants),
+                        lambda_t_log[:, None] + lambda_t_unknown[:, None],
+                    ],
+                    axis=1,
+                ),
+                f=tt.concatenate([f, tt.ones((this_model.sim_len, 1))], axis=1),
+                num_variants=num_variants + 1,
+                Phi=Phi,
+                f_is_varying=True,
+                pr_new_E_begin=250,
             )
 
         # Delay the cases by a lognormal reporting delay and add them as a trace variable
@@ -266,8 +343,11 @@ def create_model(
                 shape=(len(variants), len(variant_names)),
             )
         elif likelihood == "dirichlet":
-            factor = pm.Gamma(
-                "factor_likelihood", alpha=5, beta=5, transform=pm.transforms.log_exp_m1
+            factor = pm.Lognormal(
+                "factor_likelihood",
+                mu=np.log(0.8),
+                sigma=0.15,
+                transform=pm.transforms.log_exp_m1,
             )
             logp = pm.Dirichlet.dist(a=y * factor + 1).logp(tau_w)
             error = pm.Potential("error_tau", logp)
@@ -345,7 +425,7 @@ if __name__ == "__main__":
         chains=4,
         draws=4000,
         tune=8000,
-        #init="advi+adapt_diag",
+        # init="advi+adapt_diag",
         target_accept=0.97,
     )
 
