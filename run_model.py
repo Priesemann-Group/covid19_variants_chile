@@ -315,10 +315,10 @@ def create_model(
 
         # Modulate the inferred cases by a abs(sin(x)) function, to account for weekend effects
         # Also adds the "new_cases" variable to the trace that has all model features.
-        new_cases = week_modulation(cases=new_cases, name_cases="new_cases")
+        new_cases_modulated = week_modulation(cases=new_cases, name_cases="new_cases")
 
         # Define the likelihood, uses the new_cases_obs set as model parameter
-        student_t_likelihood(cases=new_cases)
+        student_t_likelihood(cases=new_cases_modulated)
 
         # Calculate daily fraction of each variant tau
         tau = new_cases_v / new_cases[:, np.newaxis]
