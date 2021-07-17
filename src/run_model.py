@@ -418,7 +418,7 @@ if __name__ == "__main__":
     We want each job to print to a different file, for easier debuging once
     run on a cluster.
     """
-    f_str = "Variants"
+    f_str = "Variants_v2"
     for arg in args.__dict__:
         if arg in [
             "log",
@@ -449,15 +449,16 @@ if __name__ == "__main__":
     model = create_model(args.likelihood, args.spread_method)
 
     # Sample
-    trace = pm.sample(
-        model=model,
-        return_inferencedata=True,
-        cores=cpu_count(),
-        chains=4,
-        draws=2000,
-        tune=2000,
-        init="advi+adapt_diag",
-        target_accept=0.97,
+    multitrace, trace, multitrace_tuning, trace_tuning = covid19_inference.robust_sample(
+        model,
+        draws=600,
+        tune=600,
+        tune_2nd=700,
+        tuning_chains=12,
+        final_chains=6,
+        return_tuning=True,
+        max_treedepth=10,
+        target_accept=0.95,
     )
 
     # Save trace/model so we dont have to rerun sampling every time we change some plotting routines
