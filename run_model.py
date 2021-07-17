@@ -146,7 +146,7 @@ def create_model(
             pr_median_lambda_0=pr_median_lambda,
             name_lambda_t="base_lambda_t",
         )
-        lambda_t_unknown = lambda_t_with_sigmoids(
+        lambda_t_unknown_log = lambda_t_with_sigmoids(
             change_points_list=get_cps(
                 this_model.data_begin,
                 this_model.data_end,
@@ -188,14 +188,14 @@ def create_model(
 
             # This builds a decorrelated prior for I_begin for faster inference.
             prior_I = uncorrelated_prior_I(
-                lambda_t_log=lambda_t_log + lambda_t_unknown,
+                lambda_t_log=lambda_t_log + lambda_t_unknown_log,
                 mu=mu,
                 pr_median_delay=pr_delay,
             )
 
             # Construct SIR models, for each variant and for the unknow variants
             new_cases_unknown = SIR(
-                lambda_t_log=lambda_t_log + lambda_t_unknown,
+                lambda_t_log=lambda_t_log + lambda_t_unknown_log,
                 mu=mu,
                 name_new_I_t="new_I_t",
                 pr_I_begin=prior_I,
@@ -235,7 +235,7 @@ def create_model(
                 R_t_log=tt.concatenate(
                     [
                         lambda_t_log[:, None] * np.ones(num_variants),
-                        lambda_t_log[:, None] + lambda_t_unknown[:, None],
+                        lambda_t_log[:, None] + lambda_t_unknown_log[:, None],
                     ],
                     axis=1,
                 ),
@@ -290,7 +290,7 @@ def create_model(
                 R_t_log=tt.concatenate(
                     [
                         lambda_t_log[:, None] * np.ones(num_variants),
-                        lambda_t_log[:, None] + lambda_t_unknown[:, None],
+                        lambda_t_log[:, None] + lambda_t_unknown_log[:, None],
                     ],
                     axis=1,
                 ),
