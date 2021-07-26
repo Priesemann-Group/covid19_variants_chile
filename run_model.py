@@ -84,13 +84,12 @@ def create_model(
 
     # DataRange
     data_begin = new_cases_obs.index[0]
-    data_end = new_cases_obs.index[-1]
 
     # Params for the model
     params = {
         "new_cases_obs": new_cases_obs,
         "data_begin": data_begin,
-        "fcast_len": 10,
+        "fcast_len": 42,
         "diff_data_sim": 16,
         "N_population": 19276715,  # population chile
     }
@@ -123,7 +122,14 @@ def create_model(
         cases += jhu.get_new(
             country="Peru", data_begin=be - datetime.timedelta(days=7), data_end=en
         )
-        return np.array(cases.rolling(7).mean()[be:en])
+        # extend cases by the last value
+        missing_days = [
+            cases.index[-1] + datetime.timedelta(i)
+            for i in range(1, (en - cases.index[-1]).days + 1)
+        ]
+        avg = cases.rolling(7).mean()
+        copied_last_day = avg.iloc[[-1] * len(missing_days)]
+        return avg.append(copied_last_day.set_axis(missing_days))[be:en]
 
     pr_delay = 10
 
@@ -166,8 +172,17 @@ def create_model(
         f = f * np.array([1, 1, 0, 1, 1]) + np.array([0, 0, 1, 0, 0])
 
         # Influx
-        mapping = day_to_week_matrix(
-            this_model.sim_begin, this_model.sim_end, variants.index
+        week_mapping = day_to_week_matrix(
+            this_model.sim_begin,
+            this_model.sim_end,
+            [
+                this_model.sim_begin + datetime.timedelta(weeks=i)
+                for i in range(-(-this_model.sim_len // 7))
+            ],
+        )
+
+        variants_mapping = day_to_week_matrix(
+            this_model.sim_begin, this_model.sim_end, variants.index,
         )
 
         if spreading_dynamics == "SIR":
@@ -176,9 +191,9 @@ def create_model(
                 "Phi_w",
                 sigma=0.0005 * factor_influx,
                 nu=4,
-                shape=(num_variants, len(variants.index)),
+                shape=(num_variants, week_mapping.shape[1]),
             )
-            Phi = Phi_w.dot(mapping.T) * get_neighbour(
+            Phi = Phi_w.dot(week_mapping.T) * get_neighbour(
                 this_model.sim_begin, this_model.sim_end
             )
             Phi = pm.Deterministic("Phi", Phi.T)
@@ -223,9 +238,9 @@ def create_model(
                 "Phi_w",
                 sigma=0.0005 * factor_influx,
                 nu=4,
-                shape=(num_variants + 1, len(variants.index)),
+                shape=(num_variants + 1, week_mapping.shape[1]),
             )
-            Phi = Phi_w.dot(mapping.T) * get_neighbour(
+            Phi = Phi_w.dot(week_mapping.T) * get_neighbour(
                 this_model.sim_begin, this_model.sim_end
             )
             Phi = pm.Deterministic("Phi", Phi.T)
@@ -278,9 +293,9 @@ def create_model(
                 "Phi_w",
                 sigma=0.0005 * factor_influx,
                 nu=4,
-                shape=(num_variants + 1, len(variants.index)),
+                shape=(num_variants + 1, week_mapping.shape[1]),
             )
-            Phi = Phi_w.dot(mapping.T) * get_neighbour(
+            Phi = Phi_w.dot(week_mapping.T) * get_neighbour(
                 this_model.sim_begin, this_model.sim_end
             )
             Phi = pm.Deterministic("Phi", Phi.T)
@@ -325,7 +340,7 @@ def create_model(
         pm.Deterministic("tau", tau)
 
         # Map daily tau to match weekly data
-        tau_w = tau.T.dot(mapping).T / 7  # mean tau value
+        tau_w = tau.T.dot(variants_mapping).T / 7  # mean tau value
         tau_w = tt.clip(tau_w, 1e-3, 0.9999)  # bad starting energy fix range: (0,1)
         tau_w /= tau_w.sum(axis=1, keepdims=True)
 
