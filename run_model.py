@@ -51,13 +51,13 @@ def create_model(
 
     spreading_dynamics : str
         Type of spreading dynamics to use possible : ["SIR","kernelized_spread"]
-    
+
     variants : pd.DataFrame
         Data array variants
-        
+
     new_cases : pd.DataFrame
         Data array cases
-        
+
     Returns
     -------
     model
@@ -182,7 +182,9 @@ def create_model(
         )
 
         variants_mapping = day_to_week_matrix(
-            this_model.sim_begin, this_model.sim_end, variants.index,
+            this_model.sim_begin,
+            this_model.sim_end,
+            variants.index,
         )
 
         if spreading_dynamics == "SIR":
@@ -230,7 +232,13 @@ def create_model(
 
             new_cases_v = pm.Deterministic(
                 "new_cases_v",
-                tt.concatenate([new_cases_v, new_cases_unknown[:, None],], axis=1,),
+                tt.concatenate(
+                    [
+                        new_cases_v,
+                        new_cases_unknown[:, None],
+                    ],
+                    axis=1,
+                ),
             )
         elif spreading_dynamics == "kernelized_spread":
             # Influx
@@ -374,7 +382,10 @@ def create_model(
 
         elif likelihood == "multinomial":
             pm.Multinomial(
-                "tau_w_obs", p=tau_w, observed=y, n=n,
+                "tau_w_obs",
+                p=tau_w,
+                observed=y,
+                n=n,
             )
 
         return this_model
@@ -450,5 +461,5 @@ if __name__ == "__main__":
     )
 
     # Save trace/model so we dont have to rerun sampling every time we change some plotting routines
-    with open(f"./pickled/{f_str}.pickle", "wb") as f:
+    with open(f"./pickled/{f_str}_forecast.pickle", "wb") as f:
         pickle.dump((model, trace), f)

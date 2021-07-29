@@ -93,3 +93,8 @@ target/
 *.pickled
 
 data/data_covid19_inference
+
+# Log files
+*.stdout
+*.stderr
+*.log
