@@ -144,7 +144,7 @@ def create_model(
         lambda_t_log = lambda_t_with_sigmoids(
             change_points_list=get_cps(
                 this_model.data_begin,
-                this_model.data_end,
+                this_model.sim_end,
                 interval=14,
                 pr_median_transient_len=6,
                 pr_sigma_transient_len=2,
@@ -155,7 +155,7 @@ def create_model(
         lambda_t_unknown_log = lambda_t_with_sigmoids(
             change_points_list=get_cps(
                 this_model.data_begin,
-                this_model.data_end,
+                this_model.sim_end,
                 interval=35,
                 pr_median_transient_len=20,
                 pr_sigma_transient_len=6,

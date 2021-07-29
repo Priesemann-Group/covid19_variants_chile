@@ -9,7 +9,8 @@ from rcParams import *
 log = logging.getLogger(__name__)
 
 
-def distribution(model, trace, key, nSamples_prior=1000, title="", dist_math="x", indices=None):
+def distribution(model, trace, key, nSamples_prior=1000, title="", dist_math="x", indices=None,
+                 plot_prior=True):
     """
     High level plotting function for distribution overviews.
     Only works if the distrubtion is one dim or two dimensional.
@@ -29,14 +30,16 @@ def distribution(model, trace, key, nSamples_prior=1000, title="", dist_math="x"
     data = trace.posterior[key]
 
     # This function all may change in a future pymc3 version
-
-    try:
-        prior = pm.sample_prior_predictive(
-            samples=nSamples_prior, model=model, var_names=[key]
-        )[key]
-    except:
-        log.warning(f"Could not calculate prior of {key}")
-        prior = None
+    if plot_prior:
+        try:
+            prior = pm.sample_prior_predictive(
+                samples=nSamples_prior, model=model, var_names=[key]
+            )[key]
+        except:
+            log.warning(f"Could not calculate prior of {key}")
+            prior = None
+    else:
+        prior=None
 
     if indices is None:
         indices = [i for i in range(data.shape[-1])]
@@ -82,7 +85,8 @@ def distribution(model, trace, key, nSamples_prior=1000, title="", dist_math="x"
 
 
 def _distribution(
-    array_posterior, array_prior, dist_name, dist_math, suffix="", ax=None
+    array_posterior, array_prior, dist_name, dist_math, suffix="", ax=None,
+    fontsize_median=12, fontsize_CI=10
 ):
     """
     Low level function to plots posterior and prior from arrays.
@@ -144,7 +148,7 @@ def _distribution(
             0.6,
             0.9,
             text_md,
-            fontsize=12,
+            fontsize=fontsize_median,
             transform=ax.transAxes,
             verticalalignment="top",
             horizontalalignment="center",
@@ -155,7 +159,7 @@ def _distribution(
             0.6,
             y_min * 0.9,  # let's have a ten perecent margin or so
             text_ci,
-            fontsize=9,
+            fontsize=fontsize_CI,
             transform=ax.transAxes,
             verticalalignment="top",
             horizontalalignment="center",
