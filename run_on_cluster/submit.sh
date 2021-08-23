@@ -3,8 +3,8 @@
 #$ -N COVID19-variants
 #$ -pe mvapich2-sam 32
 #$ -cwd
-#$ -o $HOME/logs/output-soccer
-#$ -e $HOME/logs/errors-soccer
+#$ -o $HOME/Repositories/covid19_variants_chile/run_on_cluster/log/output-variants
+#$ -o $HOME/Repositories/covid19_variants_chile/run_on_cluster/log/errors-variants
 #$ -t 1:6:1
 
 # avoid multithreading in numpy

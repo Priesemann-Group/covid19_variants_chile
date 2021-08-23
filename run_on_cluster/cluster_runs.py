@@ -31,7 +31,7 @@ mapping = []
 
 
 possible_params_0 = ["beta", "binom", "dirichlet", "multinomial"]
-possible_params_1 = ["SIR", "kernelized_spread"]
+possible_params_1 = ["SIR", "kernelized_spread", "kernelized_spread_and_changing_factors"]
 
 for i in possible_params_0:
     for j in possible_params_1:

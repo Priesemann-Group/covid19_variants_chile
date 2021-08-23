@@ -11,12 +11,12 @@ import pandas as pd
 import numpy as np
 from multiprocessing import cpu_count
 
-sys.path.append("./covid19_inference")
+sys.path.append("../covid19_inference")
 
 import covid19_inference
 
 covid19_inference.data_retrieval.retrieval.set_data_dir(
-    fname="./data/data_covid19_inference"
+    fname="../data/data_covid19_inference"
 )
 from covid19_inference import Cov19Model
 from covid19_inference.model import (
@@ -66,7 +66,7 @@ def create_model(
     if variants is None:
         # Load data variants
         variants = pd.read_excel(
-            "./data/Chile_Variants_Updated_with_airports.xlsx",
+            "../data/Chile_Variants_Updated_with_airports.xlsx",
             sheet_name="Variants_Count",
         )
         variants = variants.set_index("Lineage").T
@@ -410,7 +410,7 @@ if __name__ == "__main__":
         default="kernelized_spread",
     )
 
-    parser.add_argument("--log", type=str, help="Log directory", default="./log")
+    parser.add_argument("--log", type=str, help="Log directory", default="../run_on_cluster/log")
 
     args = parser.parse_args()
 
@@ -461,5 +461,5 @@ if __name__ == "__main__":
     )
 
     # Save trace/model so we dont have to rerun sampling every time we change some plotting routines
-    with open(f"./pickled/{f_str}_forecast.pickle", "wb") as f:
+    with open(f"../data/pickled/{f_str}_forecast.pickle", "wb") as f:
         pickle.dump((model, trace), f)
