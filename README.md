@@ -1,7 +1,6 @@
 # Early mutational signatures and transmissibility of SARS-CoV-2 Gamma and Lambda variants in Chile
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 This is the code repository to reproduce the figures and analysis from our "Mutational signatures and transmissibility of SARS-CoV-2 Gamma and Lambda variants" publication. 
 
